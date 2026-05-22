@@ -22,45 +22,87 @@ export default function HomePage() {
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleNext = async () => {
-    if (!agreed) {
-      alert("연구 참여에 동의하신 후 다음 단계로 진행할 수 있습니다.");
-      return;
-    }
+const handleNext = async () => {
+  if (!agreed) {
+    alert("연구 참여에 동의하신 후 다음 단계로 진행할 수 있습니다.");
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    const labelCondition = getRandomItem([1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const labelGroup = getLabelGroup(labelCondition);
-    const contentType = getRandomItem<ContentType>(["news", "ad"]);
+  const labelConditions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const contentTypes: ContentType[] = ["news", "ad"];
 
-    const { data, error } = await supabase
-      .from("participants")
-      .insert([
-        {
-          label_condition: labelCondition,
-          label_group: labelGroup,
-          content_type: contentType,
-        },
-      ])
-      .select()
-      .single();
+  const allConditions = labelConditions.flatMap((labelCondition) =>
+    contentTypes.map((contentType) => ({
+      label_condition: labelCondition,
+      label_group: getLabelGroup(labelCondition),
+      content_type: contentType,
+      count: 0,
+    }))
+  );
 
-    if (error) {
-      console.error("참가자 저장 오류:", JSON.stringify(error, null, 2));
-      alert("참가자 저장 중 오류가 발생했습니다.");
-      setIsSubmitting(false);
-      return;
-    }
+  const { data: participants, error: readError } = await supabase
+    .from("participants")
+    .select("label_condition, content_type");
 
-    localStorage.setItem("participant_id", data.id);
-    localStorage.setItem("label_condition", String(data.label_condition));
-    localStorage.setItem("label_group", data.label_group || "");
-    localStorage.setItem("content_type", data.content_type || "");
-
+  if (readError) {
+    console.error("참가자 조회 오류:", JSON.stringify(readError, null, 2));
+    alert("참가자 배정 중 오류가 발생했습니다.");
     setIsSubmitting(false);
-    router.push("/survey");
-  };
+    return;
+  }
+
+  participants?.forEach((p) => {
+    const matched = allConditions.find(
+      (c) =>
+        c.label_condition === p.label_condition &&
+        c.content_type === p.content_type
+    );
+
+    if (matched) {
+      matched.count += 1;
+    }
+  });
+
+  const minCount = Math.min(...allConditions.map((c) => c.count));
+
+  const candidateConditions = allConditions.filter(
+    (c) => c.count === minCount
+  );
+
+  const selectedCondition =
+    candidateConditions[
+      Math.floor(Math.random() * candidateConditions.length)
+    ];
+
+  const { data, error } = await supabase
+    .from("participants")
+    .insert([
+      {
+        label_condition: selectedCondition.label_condition,
+        label_group: selectedCondition.label_group,
+        content_type: selectedCondition.content_type,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("참가자 저장 오류:", JSON.stringify(error, null, 2));
+    alert("참가자 저장 중 오류가 발생했습니다.");
+    setIsSubmitting(false);
+    return;
+  }
+
+  localStorage.setItem("participant_id", data.id);
+  localStorage.setItem("label_condition", String(data.label_condition));
+  localStorage.setItem("label_group", data.label_group || "");
+  localStorage.setItem("content_type", data.content_type || "");
+
+  setIsSubmitting(false);
+  router.push("/survey");
+};
 
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-8 flex items-center justify-center">

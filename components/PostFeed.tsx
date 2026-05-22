@@ -14,7 +14,6 @@ type Post = {
   media_url?: string | null;
   media_type: MediaType;
   content_type: ContentType;
-  content_subtype?: string | null;
   label_condition: number;
   label_group: LabelGroup;
 };
@@ -44,26 +43,26 @@ const LABELS: Record<
     text: "이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
   },
   7: {
-    group: "interactive",
-    text: "AI-생성",
-    modalTitle: "AI-생성 정보",
-    modalBody:
-      "이 콘텐츠는 AI로 생성되었습니다. 실제 인물·사건과 다를 수 있으므로 내용을 해석할 때 주의가 필요합니다.",
-  },
+  group: "interactive",
+  text: "AI-생성",
+  modalTitle: "AI 생성 콘텐츠 정보",
+  modalBody:
+    "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
+},
   8: {
-    group: "interactive",
-    text: "오해 소지 있음",
-    modalTitle: "오해 소지 정보",
-    modalBody:
-      "이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 내용을 그대로 받아들이기보다 신중한 판단이 필요합니다.",
-  },
+  group: "interactive",
+  text: "오해 소지 있음",
+  modalTitle: "오해 소지 정보",
+  modalBody:
+    "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
+},
   9: {
-    group: "interactive",
-    text: "AI-생성/오해 소지 있음",
-    modalTitle: "AI-생성 및 오해 소지 정보",
-    modalBody:
-      "이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 실제 사실과 다를 수 있으므로 신중한 판단이 필요합니다.",
-  },
+  group: "interactive",
+  text: "AI-생성/오해 소지 있음",
+  modalTitle: "AI 생성 및 오해 소지 정보",
+  modalBody:
+    "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 실제 사실과 다를 수 있으므로 내용을 그대로 받아들이기보다 신중한 판단이 필요합니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
+},
 };
 
 export default function PostFeed() {
@@ -175,16 +174,22 @@ export default function PostFeed() {
 
     const duration = Date.now() - startTimeRef.current;
 
-    const { error } = await supabase.from("post_responses").insert([
-      {
-        participant_id: participantId,
-        post_id: currentPost.id,
-        accuracy_response: accuracyResponse,
-        thought_response: thoughtResponse,
-        share_intention_response: shareIntentionResponse,
-        view_duration_ms: duration,
-      },
-    ]);
+   const { error } = await supabase.from("post_responses").insert([
+  {
+    participant_id: participantId,
+    post_id: currentPost.id,
+
+    media_type: currentPost.media_type,
+    content_type: currentPost.content_type,
+    label_condition: currentPost.label_condition,
+    label_group: currentPost.label_group,
+
+    accuracy_response: accuracyResponse,
+    thought_response: thoughtResponse,
+    share_intention_response: shareIntentionResponse,
+    view_duration_ms: duration,
+  },
+]);
 
     if (error) {
       console.error("응답 저장 오류:", JSON.stringify(error, null, 2));
@@ -283,9 +288,11 @@ export default function PostFeed() {
 
           <div className="bg-black">
             {currentPost.media_type === "text" && (
-              <div className="flex min-h-[470px] w-full items-center justify-center bg-white px-6 text-center text-lg leading-8 text-gray-900">
-                {currentPost.caption}
-              </div>
+              <div className="flex min-h-[470px] w-full items-center justify-center bg-white px-10 py-10">
+  <div className="max-w-[340px] text-left text-base font-semibold leading-8 text-gray-900">
+    {currentPost.caption}
+  </div>
+</div>
             )}
 
             {currentPost.media_type === "image" &&
@@ -347,12 +354,12 @@ export default function PostFeed() {
                   싶은 부분이 있다면 무엇입니까? 자유롭게 적어주세요.
                 </label>
                 <textarea
-                  value={accuracyResponse}
-                  onChange={(e) => setAccuracyResponse(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  rows={3}
-                  placeholder="응답을 입력해 주세요."
-                />
+  value={accuracyResponse}
+  onChange={(e) => setAccuracyResponse(e.target.value)}
+  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-black"
+  rows={3}
+  placeholder="응답을 입력해 주세요."
+/>
               </div>
 
               <div>
@@ -361,12 +368,12 @@ export default function PostFeed() {
                   떠오르는 순서대로 자유롭게 적어주세요.
                 </label>
                 <textarea
-                  value={thoughtResponse}
-                  onChange={(e) => setThoughtResponse(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  rows={3}
-                  placeholder="응답을 입력해 주세요."
-                />
+  value={thoughtResponse}
+  onChange={(e) => setThoughtResponse(e.target.value)}
+  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-black"
+  rows={3}
+  placeholder="응답을 입력해 주세요."
+/>
               </div>
 
               <div>
@@ -375,12 +382,12 @@ export default function PostFeed() {
                   자유롭게 적어주세요. 한 가지여도 좋고 여러 개여도 좋습니다.
                 </label>
                 <textarea
-                  value={shareIntentionResponse}
-                  onChange={(e) => setShareIntentionResponse(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  rows={3}
-                  placeholder="응답을 입력해 주세요."
-                />
+  value={shareIntentionResponse}
+  onChange={(e) => setShareIntentionResponse(e.target.value)}
+  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-black"
+  rows={3}
+  placeholder="응답을 입력해 주세요."
+/>
               </div>
             </div>
 
@@ -405,7 +412,7 @@ export default function PostFeed() {
               {currentLabel.modalTitle}
             </h2>
 
-            <p className="mb-5 text-sm leading-6 text-gray-700">
+            <p className="mb-5 text-sm leading-6 text-gray-700 whitespace-pre-wrap">
               {currentLabel.modalBody}
             </p>
 
