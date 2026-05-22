@@ -1,0 +1,427 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { useRouter } from "next/navigation";
+
+type MediaType = "text" | "image" | "video";
+type ContentType = "news" | "ad";
+type LabelGroup = "badge" | "sentence" | "interactive";
+
+type Post = {
+  id: string;
+  caption: string;
+  media_url?: string | null;
+  media_type: MediaType;
+  content_type: ContentType;
+  content_subtype?: string | null;
+  label_condition: number;
+  label_group: LabelGroup;
+};
+
+const LABELS: Record<
+  number,
+  {
+    group: LabelGroup;
+    text: string;
+    modalTitle?: string;
+    modalBody?: string;
+  }
+> = {
+  1: { group: "badge", text: "AI-생성" },
+  2: { group: "badge", text: "오해 소지 있음" },
+  3: { group: "badge", text: "AI-생성/오해 소지 있음" },
+  4: {
+    group: "sentence",
+    text: "이 콘텐츠는 AI로 생성되었습니다. 실제 인물·사건과 다를 수 있습니다.",
+  },
+  5: {
+    group: "sentence",
+    text: "이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
+  },
+  6: {
+    group: "sentence",
+    text: "이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
+  },
+  7: {
+    group: "interactive",
+    text: "AI-생성",
+    modalTitle: "AI-생성 정보",
+    modalBody:
+      "이 콘텐츠는 AI로 생성되었습니다. 실제 인물·사건과 다를 수 있으므로 내용을 해석할 때 주의가 필요합니다.",
+  },
+  8: {
+    group: "interactive",
+    text: "오해 소지 있음",
+    modalTitle: "오해 소지 정보",
+    modalBody:
+      "이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 내용을 그대로 받아들이기보다 신중한 판단이 필요합니다.",
+  },
+  9: {
+    group: "interactive",
+    text: "AI-생성/오해 소지 있음",
+    modalTitle: "AI-생성 및 오해 소지 정보",
+    modalBody:
+      "이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 실제 사실과 다를 수 있으므로 신중한 판단이 필요합니다.",
+  },
+};
+
+export default function PostFeed() {
+  const router = useRouter();
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [accuracyResponse, setAccuracyResponse] = useState("");
+  const [thoughtResponse, setThoughtResponse] = useState("");
+  const [shareIntentionResponse, setShareIntentionResponse] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const startTimeRef = useRef<number>(0);
+  const modalStartTimeRef = useRef<number>(0);
+
+  const currentPost = posts[currentIndex];
+  const currentLabel = currentPost ? LABELS[currentPost.label_condition] : null;
+
+  const getParticipantId = () => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("participant_id");
+  };
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      const participantId = getParticipantId();
+      const labelCondition = localStorage.getItem("label_condition");
+      const contentType = localStorage.getItem("content_type");
+
+      if (!participantId || !labelCondition || !contentType) {
+        alert("실험 정보가 없습니다. 처음부터 다시 시작해 주세요.");
+        router.push("/");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("posts")
+        .select("*")
+        .eq("label_condition", Number(labelCondition))
+        .eq("content_type", contentType)
+        .in("media_type", ["text", "image", "video"]);
+
+      if (error) {
+        console.error("게시물 불러오기 오류:", JSON.stringify(error, null, 2));
+        setIsLoadingPosts(false);
+        return;
+      }
+
+      const mediaOrder: Record<string, number> = {
+        text: 1,
+        image: 2,
+        video: 3,
+      };
+
+      const sortedPosts = (data || []).sort(
+        (a, b) => mediaOrder[a.media_type] - mediaOrder[b.media_type],
+      );
+
+      setPosts(sortedPosts);
+      setIsLoadingPosts(false);
+    };
+
+    loadPosts();
+  }, [router]);
+
+  const logEvent = async (eventType: string, eventValue: string = "") => {
+    const participantId = getParticipantId();
+
+    if (!participantId || !currentPost) return;
+
+    const { error } = await supabase.from("event_logs").insert([
+      {
+        participant_id: participantId,
+        post_id: currentPost.id,
+        event_type: eventType,
+        event_value: eventValue,
+      },
+    ]);
+
+    if (error) {
+      console.error("이벤트 로그 저장 오류:", JSON.stringify(error, null, 2));
+    }
+  };
+
+  useEffect(() => {
+    const participantId = getParticipantId();
+
+    if (!currentPost || !participantId) return;
+
+    startTimeRef.current = Date.now();
+    logEvent("post_view_start");
+  }, [currentIndex, currentPost]);
+
+  const resetResponses = () => {
+    setAccuracyResponse("");
+    setThoughtResponse("");
+    setShareIntentionResponse("");
+    setIsModalOpen(false);
+  };
+
+  const handleSaveResponse = async () => {
+    const participantId = getParticipantId();
+
+    if (!participantId || !currentPost) return false;
+
+    const duration = Date.now() - startTimeRef.current;
+
+    const { error } = await supabase.from("post_responses").insert([
+      {
+        participant_id: participantId,
+        post_id: currentPost.id,
+        accuracy_response: accuracyResponse,
+        thought_response: thoughtResponse,
+        share_intention_response: shareIntentionResponse,
+        view_duration_ms: duration,
+      },
+    ]);
+
+    if (error) {
+      console.error("응답 저장 오류:", JSON.stringify(error, null, 2));
+      alert("응답 저장에 실패했습니다.");
+      return false;
+    }
+
+    await logEvent("response_submit");
+    await logEvent("view_duration", String(duration));
+
+    return true;
+  };
+
+  const handleNext = async () => {
+    if (
+      !accuracyResponse.trim() ||
+      !thoughtResponse.trim() ||
+      !shareIntentionResponse.trim()
+    ) {
+      alert("세 문항에 모두 응답해 주세요.");
+      return;
+    }
+
+    const saved = await handleSaveResponse();
+    if (!saved) return;
+
+    if (currentIndex < posts.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      resetResponses();
+    } else {
+      router.push("/end");
+    }
+  };
+
+  if (isLoadingPosts) {
+    return <div className="p-6">게시물을 불러오는 중입니다...</div>;
+  }
+
+  if (!currentPost || !currentLabel) {
+    return (
+      <div className="p-6">
+        표시할 게시물이 없습니다. Supabase posts 테이블에 현재 배정 조건에 맞는
+        게시물이 있는지 확인해 주세요.
+      </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#fafafa] flex justify-center px-4 py-8">
+      <div className="w-full max-w-[470px]">
+        <div className="mb-4 flex items-center justify-between px-1">
+          <h1 className="text-xl font-bold tracking-tight">Instagram</h1>
+          <div className="text-sm text-gray-500">
+            {currentIndex + 1} / {posts.length}
+          </div>
+        </div>
+
+        <div className="mb-4 px-1 text-sm text-gray-600">
+          평소 SNS를 이용하듯 게시물을 확인한 뒤, 아래 문항에 응답해 주세요.
+        </div>
+
+        <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <header className="flex items-center justify-between px-4 py-3">
+            <div className="text-sm font-semibold">추천 게시물</div>
+          </header>
+
+          {currentLabel.group === "badge" && (
+            <div className="mx-4 mb-3 text-xl font-bold text-gray-900">
+              {currentLabel.text}
+            </div>
+          )}
+
+          {currentLabel.group === "sentence" && (
+            <div className="mx-4 mb-2 px-4 py-2 rounded-xl text-base text-gray-800 bg-gray-100 leading-6">
+              {currentLabel.text}
+            </div>
+          )}
+
+          {currentLabel.group === "interactive" && (
+            <div className="mx-4 mb-2 flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  modalStartTimeRef.current = Date.now();
+                  setIsModalOpen(true);
+                  await logEvent("label_click");
+                  await logEvent("modal_open");
+                }}
+                className="px-3 py-1.5 rounded-full bg-gray-100 text-base font-medium text-gray-800 transition-transform duration-150 hover:scale-105"
+              >
+                {currentLabel.text}
+              </button>
+
+              <span className="text-xs text-gray-400">자세히 보기</span>
+            </div>
+          )}
+
+          <div className="bg-black">
+            {currentPost.media_type === "text" && (
+              <div className="flex min-h-[470px] w-full items-center justify-center bg-white px-6 text-center text-lg leading-8 text-gray-900">
+                {currentPost.caption}
+              </div>
+            )}
+
+            {currentPost.media_type === "image" &&
+              (currentPost.media_url ? (
+                <img
+                  src={currentPost.media_url}
+                  alt="post"
+                  className="h-[470px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[470px] w-full items-center justify-center bg-gray-200 text-gray-500">
+                  이미지 없음
+                </div>
+              ))}
+
+            {currentPost.media_type === "video" &&
+              (currentPost.media_url ? (
+                <video
+                  src={currentPost.media_url}
+                  controls
+                  className="h-[470px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[470px] w-full items-center justify-center bg-gray-200 text-gray-500">
+                  동영상 없음
+                </div>
+              ))}
+          </div>
+
+          {currentPost.media_type !== "text" && (
+            <section className="px-4 pt-3">
+              <div className="mb-3 text-sm leading-6 text-gray-900">
+                <span>{currentPost.caption}</span>
+              </div>
+            </section>
+          )}
+
+          <section className="px-4 pb-4 pt-3">
+            <div className="mb-3 flex items-center gap-4">
+              <button
+                disabled
+                className="text-2xl leading-none opacity-40 cursor-not-allowed"
+                aria-label="좋아요 비활성화"
+              ></button>
+
+              <button
+                disabled
+                className="text-2xl leading-none opacity-40 cursor-not-allowed"
+                aria-label="댓글 비활성화"
+              ></button>
+            </div>
+
+            <div className="mb-4 text-xs text-gray-400"></div>
+
+            <div className="space-y-4 border-t border-gray-100 pt-4">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-800">
+                  이 게시물을 본 후, 더 알아보고 싶은 점이나 추가로 확인하고
+                  싶은 부분이 있다면 무엇입니까? 자유롭게 적어주세요.
+                </label>
+                <textarea
+                  value={accuracyResponse}
+                  onChange={(e) => setAccuracyResponse(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  rows={3}
+                  placeholder="응답을 입력해 주세요."
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-800">
+                  이 게시물을 처음 봤을 때 머릿속에 떠오른 생각이나 느낌을
+                  떠오르는 순서대로 자유롭게 적어주세요.
+                </label>
+                <textarea
+                  value={thoughtResponse}
+                  onChange={(e) => setThoughtResponse(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  rows={3}
+                  placeholder="응답을 입력해 주세요."
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-800">
+                  이 게시물을 본 후, 자연스럽게 떠오른 다음 행동이 있다면
+                  자유롭게 적어주세요. 한 가지여도 좋고 여러 개여도 좋습니다.
+                </label>
+                <textarea
+                  value={shareIntentionResponse}
+                  onChange={(e) => setShareIntentionResponse(e.target.value)}
+                  className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  rows={3}
+                  placeholder="응답을 입력해 주세요."
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <button
+                onClick={handleNext}
+                className="w-full rounded-xl bg-black px-4 py-3 text-sm font-medium text-white hover:bg-gray-800"
+              >
+                {currentIndex < posts.length - 1
+                  ? "다음 게시물 보기"
+                  : "응답 완료하기"}
+              </button>
+            </div>
+          </section>
+        </article>
+      </div>
+
+      {isModalOpen && currentLabel.group === "interactive" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="mb-3 text-lg font-bold">
+              {currentLabel.modalTitle}
+            </h2>
+
+            <p className="mb-5 text-sm leading-6 text-gray-700">
+              {currentLabel.modalBody}
+            </p>
+
+            <button
+              onClick={async () => {
+                const modalDuration = Date.now() - modalStartTimeRef.current;
+                await logEvent("modal_close", String(modalDuration));
+                setIsModalOpen(false);
+              }}
+              className="w-full rounded-xl bg-black px-4 py-3 text-white"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
