@@ -360,8 +360,9 @@ export default function PostFeed() {
             <div className="space-y-4 border-t border-gray-100 pt-4">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 본 후, 더 알아보고 싶은 점이나 추가로 확인하고
-                  싶은 부분이 있다면 무엇입니까? 자유롭게 적어주세요.
+                  이 게시물을 보고 어떤 인상이나 판단이 드시는지, 그리고 그러한
+                  판단으로 이어진 부분이 있다면 무엇이었는지 자유롭게
+                  적어주세요.
                 </label>
                 <textarea
                   value={accuracyResponse}
