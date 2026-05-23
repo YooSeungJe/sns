@@ -366,10 +366,10 @@ export default function PostFeed() {
             <div className="space-y-4 pt-1">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 보고 어떤 인상이나 판단이 드시는지, 그리고 그러한
-                  판단으로 이어진 부분이 있다면 무엇이었는지 자유롭게
-                  적어주세요.
-                </label>
+  {currentPost.media_type === "image"
+    ? "이 게시물의 내용이 얼마나 사실 같다고 느끼셨나요? 어떤 부분이 믿음직스러웠고, 어떤 부분이 의심스러웠는지, 그리고 그렇게 느낀 이유는 무엇인지 자유롭게 적어주세요."
+    : "이 게시물을 보고 어떤 인상이나 판단이 드시는지, 그리고 그러한 판단으로 이어진 부분이 있다면 무엇이었는지 자유롭게 적어주세요."}
+</label>
                 <textarea
                   value={accuracyResponse}
                   onChange={(e) => setAccuracyResponse(e.target.value)}
@@ -395,9 +395,10 @@ export default function PostFeed() {
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 본 후, 자연스럽게 떠오른 다음 행동이 있다면
-                  자유롭게 적어주세요. 한 가지여도 좋고 여러 개여도 좋습니다.
-                </label>
+  {currentPost.media_type === "image"
+    ? "이 게시물을 SNS에서 본다면 공유하실 것 같나요? 공유하실 것 같다면 누구에게 어떤 이유로 보내실 것 같은지, 공유하지 않으실 것 같다면 그 이유는 무엇인지 자유롭게 적어주세요."
+    : "이 게시물을 본 후, 자연스럽게 떠오른 다음 행동이 있다면 자유롭게 적어주세요. 한 가지여도 좋고 여러 개여도 좋습니다."}
+</label>
                 <textarea
                   value={shareIntentionResponse}
                   onChange={(e) => setShareIntentionResponse(e.target.value)}
