@@ -257,10 +257,10 @@ export default function PostFeed() {
           </header>
 
           {currentLabel.group === "badge" && (
-            <div className="mx-4 mb-3 text-xl font-bold text-gray-900">
-              {currentLabel.text}
-            </div>
-          )}
+  <div className="mx-4 mb-2 inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-base font-bold text-gray-900">
+    {currentLabel.text}
+  </div>
+)}
 
           {currentLabel.group === "sentence" && (
             <div className="mx-4 mb-2 px-4 py-2 rounded-xl text-base text-gray-800 bg-gray-100 leading-6">
