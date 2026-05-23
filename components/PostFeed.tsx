@@ -310,7 +310,7 @@ export default function PostFeed() {
                 <img
                   src={currentPost.media_url}
                   alt="post"
-                  className="h-[470px] w-full object-cover"
+                  className="w-full max-h-[70vh] object-contain bg-black"
                 />
               ) : (
                 <div className="flex h-[470px] w-full items-center justify-center bg-gray-200 text-gray-500">
@@ -323,7 +323,7 @@ export default function PostFeed() {
                 <video
                   src={currentPost.media_url}
                   controls
-                  className="h-[470px] w-full object-cover"
+                  className="w-full max-h-[70vh] object-contain bg-black"
                 />
               ) : (
                 <div className="flex h-[470px] w-full items-center justify-center bg-gray-200 text-gray-500">
@@ -341,23 +341,29 @@ export default function PostFeed() {
           )}
 
           <section className="px-4 pb-4 pt-3">
-            <div className="mb-3 flex items-center gap-4">
+            <div className="mb-3 flex items-center gap-5">
               <button
+                type="button"
                 disabled
-                className="text-2xl leading-none opacity-40 cursor-not-allowed"
-                aria-label="좋아요 비활성화"
-              ></button>
+                className="flex items-center gap-1 text-sm text-gray-600 opacity-70 cursor-not-allowed"
+              >
+                <span className="text-2xl leading-none">♡</span>
+                <span>좋아요</span>
+              </button>
 
               <button
+                type="button"
                 disabled
-                className="text-2xl leading-none opacity-40 cursor-not-allowed"
-                aria-label="댓글 비활성화"
-              ></button>
+                className="flex items-center gap-1 text-sm text-gray-600 opacity-70 cursor-not-allowed"
+              >
+                <span className="text-2xl leading-none">↗</span>
+                <span>공유</span>
+              </button>
             </div>
 
-            <div className="mb-4 text-xs text-gray-400"></div>
+            <div className="my-5 border-t border-gray-200"></div>
 
-            <div className="space-y-4 border-t border-gray-100 pt-4">
+            <div className="space-y-4 pt-1">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
                   이 게시물을 보고 어떤 인상이나 판단이 드시는지, 그리고 그러한
