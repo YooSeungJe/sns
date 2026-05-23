@@ -22,87 +22,87 @@ export default function HomePage() {
   const [agreed, setAgreed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-const handleNext = async () => {
-  if (!agreed) {
-    alert("연구 참여에 동의하신 후 다음 단계로 진행할 수 있습니다.");
-    return;
-  }
+  const handleNext = async () => {
+    if (!agreed) {
+      alert("연구 참여에 동의하신 후 다음 단계로 진행할 수 있습니다.");
+      return;
+    }
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  const labelConditions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-  const contentTypes: ContentType[] = ["news", "ad"];
+    const labelConditions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const contentTypes: ContentType[] = ["news", "ad"];
 
-  const allConditions = labelConditions.flatMap((labelCondition) =>
-    contentTypes.map((contentType) => ({
-      label_condition: labelCondition,
-      label_group: getLabelGroup(labelCondition),
-      content_type: contentType,
-      count: 0,
-    }))
-  );
-
-  const { data: participants, error: readError } = await supabase
-    .from("participants")
-    .select("label_condition, content_type");
-
-  if (readError) {
-    console.error("참가자 조회 오류:", JSON.stringify(readError, null, 2));
-    alert("참가자 배정 중 오류가 발생했습니다.");
-    setIsSubmitting(false);
-    return;
-  }
-
-  participants?.forEach((p) => {
-    const matched = allConditions.find(
-      (c) =>
-        c.label_condition === p.label_condition &&
-        c.content_type === p.content_type
+    const allConditions = labelConditions.flatMap((labelCondition) =>
+      contentTypes.map((contentType) => ({
+        label_condition: labelCondition,
+        label_group: getLabelGroup(labelCondition),
+        content_type: contentType,
+        count: 0,
+      })),
     );
 
-    if (matched) {
-      matched.count += 1;
+    const { data: participants, error: readError } = await supabase
+      .from("participants")
+      .select("label_condition, content_type");
+
+    if (readError) {
+      console.error("참가자 조회 오류:", JSON.stringify(readError, null, 2));
+      alert("참가자 배정 중 오류가 발생했습니다.");
+      setIsSubmitting(false);
+      return;
     }
-  });
 
-  const minCount = Math.min(...allConditions.map((c) => c.count));
+    participants?.forEach((p) => {
+      const matched = allConditions.find(
+        (c) =>
+          c.label_condition === p.label_condition &&
+          c.content_type === p.content_type,
+      );
 
-  const candidateConditions = allConditions.filter(
-    (c) => c.count === minCount
-  );
+      if (matched) {
+        matched.count += 1;
+      }
+    });
 
-  const selectedCondition =
-    candidateConditions[
-      Math.floor(Math.random() * candidateConditions.length)
-    ];
+    const minCount = Math.min(...allConditions.map((c) => c.count));
 
-  const { data, error } = await supabase
-    .from("participants")
-    .insert([
-      {
-        label_condition: selectedCondition.label_condition,
-        label_group: selectedCondition.label_group,
-        content_type: selectedCondition.content_type,
-      },
-    ])
-    .select()
-    .single();
+    const candidateConditions = allConditions.filter(
+      (c) => c.count === minCount,
+    );
 
-  if (error) {
-    console.error("참가자 저장 오류:", JSON.stringify(error, null, 2));
-    alert("참가자 저장 중 오류가 발생했습니다.");
+    const selectedCondition =
+      candidateConditions[
+        Math.floor(Math.random() * candidateConditions.length)
+      ];
+
+    const { data, error } = await supabase
+      .from("participants")
+      .insert([
+        {
+          label_condition: selectedCondition.label_condition,
+          label_group: selectedCondition.label_group,
+          content_type: selectedCondition.content_type,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("참가자 저장 오류:", JSON.stringify(error, null, 2));
+      alert("참가자 저장 중 오류가 발생했습니다.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    localStorage.setItem("participant_id", data.id);
+    localStorage.setItem("label_condition", String(data.label_condition));
+    localStorage.setItem("label_group", data.label_group || "");
+    localStorage.setItem("content_type", data.content_type || "");
+
     setIsSubmitting(false);
-    return;
-  }
-
-  localStorage.setItem("participant_id", data.id);
-  localStorage.setItem("label_condition", String(data.label_condition));
-  localStorage.setItem("label_group", data.label_group || "");
-  localStorage.setItem("content_type", data.content_type || "");
-
-  setIsSubmitting(false);
-  router.push("/survey");
-};
+    router.push("/survey");
+  };
 
   return (
     <main className="min-h-screen bg-gray-100 px-4 py-8 flex items-center justify-center">
@@ -120,10 +120,10 @@ const handleNext = async () => {
               1. 연구 배경과 목적
             </h2>
             <p>
-              본 연구는 소셜미디어에서 AI 생성 콘텐츠에 부착되는 라벨의 효과를
-              알아보기 위한 연구입니다. 본 연구의 결과는 AI 콘텐츠 라벨링 정책의
-              실효성에 관한 학문적 연구를 확장하고, 보다 효과적인 라벨링 설계를
-              위한 시사점을 제공할 것으로 기대됩니다.
+              본 연구는 소셜미디어 환경에서 다양한 디지털 콘텐츠에 대한 이용자의
+              인식과 반응을 살펴보기 위한 연구입니다. 연구 결과는 온라인 콘텐츠
+              이용 경험에 대한 이해를 높이고, 디지털 플랫폼 환경과 관련된 학문적
+              연구에 기여할 것으로 기대됩니다.
             </p>
           </section>
 
@@ -142,15 +142,10 @@ const handleNext = async () => {
               3. 연구 수행방법
             </h2>
             <p>
-              연구 참여자는 시스템에 의해 9개 라벨 조건 중 하나와 콘텐츠 유형
-              조건인 뉴스 또는 광고 중 하나에 무작위로 배정됩니다.
-              <br />
-              이후 모의 소셜미디어 피드에서 텍스트, 사진, 동영상 형식의 게시물
-              총 3개를 확인하고, 각 게시물에 대해 정확성 인식, 즉각적으로 떠오른
-              생각, 공유 의도에 관한 문항에 응답하게 됩니다.
-              <br />
-              좋아요 및 댓글 버튼은 실제 소셜미디어 화면과 유사한 환경을
-              구성하기 위해 표시되지만, 본 실험에서는 비활성화되어 있습니다.
+              연구 참여자는 시스템에 의해 서로 다른 콘텐츠 제시 조건 중 하나에
+              무작위로 배정됩니다. 이후 모의 소셜미디어 피드에서 텍스트, 사진,
+              동영상 형식의 게시물 총 3개를 확인하고, 각 게시물에 대한 인식 및
+              의견과 관련된 문항에 응답하게 됩니다.
             </p>
           </section>
 
@@ -181,10 +176,9 @@ const handleNext = async () => {
               6. 연구참여에 따른 이익
             </h2>
             <p>
-              본 연구에 참여함으로써 귀하에게 돌아가는 직접적인 이익은 없습니다.
-              다만, 본 연구의 결과는 소셜미디어 플랫폼의 AI 콘텐츠 라벨링 정책
-              수립 및 효과적인 라벨 디자인 가이드라인 개발에 학술적 근거를
-              제공하는 데 기여할 수 있습니다.
+              본 연구에 참여함으로써 귀하에게 직접적인 이익은 없습니다. 다만,
+              연구 결과는 디지털 콘텐츠 환경에서의 사용자 경험과 정보 이용에
+              관한 학문적 이해를 높이는 데 기여할 수 있습니다.
             </p>
           </section>
 
@@ -206,11 +200,7 @@ const handleNext = async () => {
             </h2>
             <p>본 연구에서 수집하는 정보는 다음과 같습니다.</p>
             <ul className="mt-3 list-disc pl-6 space-y-2">
-              <li>조건 배정 정보: 라벨 조건, 콘텐츠 유형 조건</li>
-              <li>
-                게시물 응답 데이터: 정확성 인식, 게시물을 보고 바로 든 생각,
-                공유 의도
-              </li>
+              <li>게시물 응답 데이터</li>
               <li>
                 행동 로그 데이터: 게시물별 체류 시간, 라벨 클릭 여부, 모달 창
                 확인 여부 및 각 이벤트 발생 시각
