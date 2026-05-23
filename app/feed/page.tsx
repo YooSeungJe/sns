@@ -8,5 +8,5 @@ export default async function FeedPage() {
     return <div>게시물을 불러오는 중 오류가 발생했습니다.</div>;
   }
 
-  return <PostFeed posts={posts || []} />;
+  return <PostFeed />;
 }
