@@ -77,6 +77,10 @@ export default function PostFeed() {
   const [thoughtResponse, setThoughtResponse] = useState("");
   const [shareIntentionResponse, setShareIntentionResponse] = useState("");
 
+  const [accuracyIntentResponse, setAccuracyIntentResponse] = useState("");
+const [thoughtIntentResponse, setThoughtIntentResponse] = useState("");
+const [shareIntentResponse, setShareIntentResponse] = useState("");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const startTimeRef = useRef<number>(0);
@@ -84,6 +88,7 @@ export default function PostFeed() {
 
   const currentPost = posts[currentIndex];
   const currentLabel = currentPost ? LABELS[currentPost.label_condition] : null;
+
 
   const getParticipantId = () => {
     if (typeof window === "undefined") return null;
@@ -164,6 +169,10 @@ export default function PostFeed() {
     setAccuracyResponse("");
     setThoughtResponse("");
     setShareIntentionResponse("");
+
+     setAccuracyIntentResponse("");
+  setThoughtIntentResponse("");
+  setShareIntentResponse("");
     setIsModalOpen(false);
   };
 
@@ -187,6 +196,9 @@ export default function PostFeed() {
         accuracy_response: accuracyResponse,
         thought_response: thoughtResponse,
         share_intention_response: shareIntentionResponse,
+        accuracy_intent_response: accuracyIntentResponse,
+thought_intent_response: thoughtIntentResponse,
+share_intent_response: shareIntentResponse,
         view_duration_ms: duration,
       },
     ]);
@@ -377,6 +389,21 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
+                {(currentPost.media_type === "text" ||
+  currentPost.media_type === "image") && (
+  <div className="mt-3">
+    <label className="mb-2 block text-sm font-semibold text-blue-900">
+      위 질문의 의도가 무엇인 것 같으십니까?
+    </label>
+    <textarea
+      value={accuracyIntentResponse}
+      onChange={(e) => setAccuracyIntentResponse(e.target.value)}
+      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+      rows={2}
+      placeholder="응답을 입력해 주세요."
+    />
+  </div>
+)}
               </div>
 
               <div>
@@ -391,6 +418,21 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
+                {(currentPost.media_type === "text" ||
+  currentPost.media_type === "image") && (
+  <div className="mt-3">
+    <label className="mb-2 block text-sm font-semibold text-blue-900">
+      위 질문의 의도가 무엇인 것 같으십니까?
+    </label>
+    <textarea
+      value={thoughtIntentResponse}
+      onChange={(e) => setThoughtIntentResponse(e.target.value)}
+      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+      rows={2}
+      placeholder="응답을 입력해 주세요."
+    />
+  </div>
+)}
               </div>
 
               <div>
@@ -406,6 +448,21 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
+                {(currentPost.media_type === "text" ||
+  currentPost.media_type === "image") && (
+  <div className="mt-3">
+    <label className="mb-2 block text-sm font-semibold text-blue-900">
+      위 질문의 의도가 무엇인 것 같으십니까?
+    </label>
+    <textarea
+      value={shareIntentResponse}
+      onChange={(e) => setShareIntentResponse(e.target.value)}
+      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+      rows={2}
+      placeholder="응답을 입력해 주세요."
+    />
+  </div>
+)}
               </div>
             </div>
 
