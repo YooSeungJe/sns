@@ -78,8 +78,8 @@ export default function PostFeed() {
   const [shareIntentionResponse, setShareIntentionResponse] = useState("");
 
   const [accuracyIntentResponse, setAccuracyIntentResponse] = useState("");
-const [thoughtIntentResponse, setThoughtIntentResponse] = useState("");
-const [shareIntentResponse, setShareIntentResponse] = useState("");
+  const [thoughtIntentResponse, setThoughtIntentResponse] = useState("");
+  const [shareIntentResponse, setShareIntentResponse] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -88,7 +88,6 @@ const [shareIntentResponse, setShareIntentResponse] = useState("");
 
   const currentPost = posts[currentIndex];
   const currentLabel = currentPost ? LABELS[currentPost.label_condition] : null;
-
 
   const getParticipantId = () => {
     if (typeof window === "undefined") return null;
@@ -130,7 +129,7 @@ const [shareIntentResponse, setShareIntentResponse] = useState("");
         (a, b) => mediaOrder[a.media_type] - mediaOrder[b.media_type],
       );
 
-      setPosts(sortedPosts);
+      setPosts(sortedPosts.slice(1, 2));
       setIsLoadingPosts(false);
     };
 
@@ -170,9 +169,9 @@ const [shareIntentResponse, setShareIntentResponse] = useState("");
     setThoughtResponse("");
     setShareIntentionResponse("");
 
-     setAccuracyIntentResponse("");
-  setThoughtIntentResponse("");
-  setShareIntentResponse("");
+    setAccuracyIntentResponse("");
+    setThoughtIntentResponse("");
+    setShareIntentResponse("");
     setIsModalOpen(false);
   };
 
@@ -197,8 +196,8 @@ const [shareIntentResponse, setShareIntentResponse] = useState("");
         thought_response: thoughtResponse,
         share_intention_response: shareIntentionResponse,
         accuracy_intent_response: accuracyIntentResponse,
-thought_intent_response: thoughtIntentResponse,
-share_intent_response: shareIntentResponse,
+        thought_intent_response: thoughtIntentResponse,
+        share_intent_response: shareIntentResponse,
         view_duration_ms: duration,
       },
     ]);
@@ -269,10 +268,10 @@ share_intent_response: shareIntentResponse,
           </header>
 
           {currentLabel.group === "badge" && (
-  <div className="mx-4 mb-2 inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-base font-bold text-gray-900">
-    {currentLabel.text}
-  </div>
-)}
+            <div className="mx-4 mb-2 inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-base font-bold text-gray-900">
+              {currentLabel.text}
+            </div>
+          )}
 
           {currentLabel.group === "sentence" && (
             <div className="mx-4 mb-2 px-4 py-2 rounded-xl text-base text-gray-800 bg-gray-100 leading-6">
@@ -378,10 +377,10 @@ share_intent_response: shareIntentResponse,
             <div className="space-y-4 pt-1">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-  {currentPost.media_type === "image"
-    ? "이 게시물 안에서 가장 사실에 가깝게 느껴진 부분과 가장 의심스럽게 느껴진 부분을 각각 짚어주시고, 왜 그렇게 느꼈는지 설명해주세요. 둘 중 하나만 떠오른다면 그것만 적으셔도 좋습니다."
-    : "이 게시물을 보고 어떤 인상이나 판단이 드시는지, 그리고 그러한 판단으로 이어진 부분이 있다면 무엇이었는지 자유롭게 적어주세요."}
-</label>
+                  이 게시물의 내용이 평소 알고 있던 정보와 잘 맞는다고
+                  느끼셨나요, 아니면 어딘가 어색하거나 어긋난다고 느끼셨나요?
+                  그렇게 느낀 이유와 해당 부분도 함께 적어주세요
+                </label>
                 <textarea
                   value={accuracyResponse}
                   onChange={(e) => setAccuracyResponse(e.target.value)}
@@ -390,26 +389,29 @@ share_intent_response: shareIntentResponse,
                   placeholder="응답을 입력해 주세요."
                 />
                 {(currentPost.media_type === "text" ||
-  currentPost.media_type === "image") && (
-  <div className="mt-3">
-    <label className="mb-2 block text-sm font-semibold text-blue-900">
-      위 질문의 의도가 무엇인 것 같으십니까?
-    </label>
-    <textarea
-      value={accuracyIntentResponse}
-      onChange={(e) => setAccuracyIntentResponse(e.target.value)}
-      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-      rows={2}
-      placeholder="응답을 입력해 주세요."
-    />
-  </div>
-)}
+                  currentPost.media_type === "image") && (
+                  <div className="mt-3">
+                    <label className="mb-2 block text-sm font-semibold text-blue-900">
+                      위 질문의 의도가 무엇인 것 같으십니까?
+                    </label>
+                    <textarea
+                      value={accuracyIntentResponse}
+                      onChange={(e) =>
+                        setAccuracyIntentResponse(e.target.value)
+                      }
+                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+                      rows={2}
+                      placeholder="응답을 입력해 주세요."
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 처음 봤을 때 머릿속에 떠오른 생각이나 느낌을
-                  떠오르는 순서대로 자유롭게 적어주세요.
+                  이 게시물을 보면서 자연스럽게 납득된 부분이나, 반대로 ‘이게
+                  사실일까?’ 하고 의문이 들었던 부분이 있다면 자유롭게
+                  적어주세요. 둘 중 하나만 떠오른다면 그것만 작성하셔도 됩니다.
                 </label>
                 <textarea
                   value={thoughtResponse}
@@ -419,28 +421,28 @@ share_intent_response: shareIntentResponse,
                   placeholder="응답을 입력해 주세요."
                 />
                 {(currentPost.media_type === "text" ||
-  currentPost.media_type === "image") && (
-  <div className="mt-3">
-    <label className="mb-2 block text-sm font-semibold text-blue-900">
-      위 질문의 의도가 무엇인 것 같으십니까?
-    </label>
-    <textarea
-      value={thoughtIntentResponse}
-      onChange={(e) => setThoughtIntentResponse(e.target.value)}
-      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-      rows={2}
-      placeholder="응답을 입력해 주세요."
-    />
-  </div>
-)}
+                  currentPost.media_type === "image") && (
+                  <div className="mt-3">
+                    <label className="mb-2 block text-sm font-semibold text-blue-900">
+                      위 질문의 의도가 무엇인 것 같으십니까?
+                    </label>
+                    <textarea
+                      value={thoughtIntentResponse}
+                      onChange={(e) => setThoughtIntentResponse(e.target.value)}
+                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+                      rows={2}
+                      placeholder="응답을 입력해 주세요."
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-  {currentPost.media_type === "image"
-    ? "이 게시물을 보면서 떠오른 사람이 있다면, 누구이고 어떤 방식으로(직접 보여주기, 링크 보내기, 단톡방·SNS에 올리기 등) 전하게 될 것 같은지, 그리고 어떤 상황에서 그럴 것 같은지 구체적으로 적어주세요. 떠오르는 사람이 없다면, 왜 그런지도 함께 설명해주세요."
-    : "이 게시물을 본 후, 자연스럽게 떠오른 다음 행동이 있다면 자유롭게 적어주세요. 한 가지여도 좋고 여러 개여도 좋습니다."}
-</label>
+                  {
+                    "이 게시물의 내용이 사실일 가능성이 얼마나 된다고 생각하시는지, 그렇게 보시는 이유와 함께 적어주세요. '거의 확실하다' 정도에 가까운지, '반반' 정도에 가까운지, '거의 아닐 것 같다' 정도에 가까운지 자유롭게요."
+                  }
+                </label>
                 <textarea
                   value={shareIntentionResponse}
                   onChange={(e) => setShareIntentionResponse(e.target.value)}
@@ -449,20 +451,20 @@ share_intent_response: shareIntentResponse,
                   placeholder="응답을 입력해 주세요."
                 />
                 {(currentPost.media_type === "text" ||
-  currentPost.media_type === "image") && (
-  <div className="mt-3">
-    <label className="mb-2 block text-sm font-semibold text-blue-900">
-      위 질문의 의도가 무엇인 것 같으십니까?
-    </label>
-    <textarea
-      value={shareIntentResponse}
-      onChange={(e) => setShareIntentResponse(e.target.value)}
-      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-      rows={2}
-      placeholder="응답을 입력해 주세요."
-    />
-  </div>
-)}
+                  currentPost.media_type === "image") && (
+                  <div className="mt-3">
+                    <label className="mb-2 block text-sm font-semibold text-blue-900">
+                      위 질문의 의도가 무엇인 것 같으십니까?
+                    </label>
+                    <textarea
+                      value={shareIntentResponse}
+                      onChange={(e) => setShareIntentResponse(e.target.value)}
+                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
+                      rows={2}
+                      placeholder="응답을 입력해 주세요."
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
