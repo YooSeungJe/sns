@@ -216,9 +216,9 @@ export default function PostFeed() {
 
   const handleNext = async () => {
     if (
-      !accuracyResponse.trim() ||
-      !thoughtResponse.trim() ||
-      !shareIntentionResponse.trim()
+      !accuracyResponse.trim()
+      // !thoughtResponse.trim() ||
+      // !shareIntentionResponse.trim()
     ) {
       alert("세 문항에 모두 응답해 주세요.");
       return;
@@ -377,9 +377,8 @@ export default function PostFeed() {
             <div className="space-y-4 pt-1">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물의 내용이 평소 알고 있던 정보와 잘 맞는다고
-                  느끼셨나요, 아니면 어딘가 어색하거나 어긋난다고 느끼셨나요?
-                  그렇게 느낀 이유와 해당 부분도 함께 적어주세요
+                  이 게시물을 처음 보았을 때 떠오른 생각이나 느낌을 자유롭게
+                  적어주세요.
                 </label>
                 <textarea
                   value={accuracyResponse}
@@ -407,7 +406,7 @@ export default function PostFeed() {
                 )}
               </div>
 
-              <div>
+              {/* <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
                   이 게시물을 보면서 자연스럽게 납득된 부분이나, 반대로 ‘이게
                   사실일까?’ 하고 의문이 들었던 부분이 있다면 자유롭게
@@ -435,9 +434,9 @@ export default function PostFeed() {
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
 
-              <div>
+              {/* <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
                   {
                     "이 게시물의 내용이 사실일 가능성이 얼마나 된다고 생각하시는지, 그렇게 보시는 이유와 함께 적어주세요. '거의 확실하다' 정도에 가까운지, '반반' 정도에 가까운지, '거의 아닐 것 같다' 정도에 가까운지 자유롭게요."
@@ -465,7 +464,7 @@ export default function PostFeed() {
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
 
             <div className="mt-4">
