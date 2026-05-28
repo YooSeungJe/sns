@@ -310,8 +310,8 @@ export default function PostFeed() {
           <div className="bg-black">
             {currentPost.media_type === "text" && (
               <div className="flex min-h-[470px] w-full items-center justify-center bg-white px-10 py-10">
-                <div className="max-w-[340px] text-left text-base font-semibold leading-8 text-gray-900">
-                  {currentPost.caption}
+                <div className="max-w-[340px] whitespace-pre-line text-left text-base font-semibold leading-8 text-gray-900">
+                  {currentPost.caption.replace(/\\n/g, "\n")}
                 </div>
               </div>
             )}
