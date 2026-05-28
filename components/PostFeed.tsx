@@ -27,39 +27,39 @@ const LABELS: Record<
     modalBody?: string;
   }
 > = {
-  1: { group: "badge", text: "AI-생성" },
-  2: { group: "badge", text: "오해 소지 있음" },
-  3: { group: "badge", text: "AI-생성/오해 소지 있음" },
+  1: { group: "badge", text: "ⓘ AI-생성" },
+  2: { group: "badge", text: "ⓘ 오해 소지 있음" },
+  3: { group: "badge", text: "ⓘ AI-생성/오해 소지 있음" },
   4: {
     group: "sentence",
-    text: "이 콘텐츠는 AI로 생성되었습니다. 실제 인물·사건과 다를 수 있습니다.",
+    text: "ⓘ 이 콘텐츠는 AI로 생성되었습니다. 실제 인물·사건과 다를 수 있습니다.",
   },
   5: {
     group: "sentence",
-    text: "이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
+    text: "ⓘ 이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
   },
   6: {
     group: "sentence",
-    text: "이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
+    text: "ⓘ 이 콘텐츠는 AI로 생성되었으며, 오해의 소지가 있는 정보를 포함할 수 있습니다. 신중한 판단이 필요합니다.",
   },
   7: {
     group: "interactive",
-    text: "AI-생성",
-    modalTitle: "AI 생성 콘텐츠 정보",
+    text: "ⓘ AI-생성",
+    modalTitle: "ⓘ AI 생성 콘텐츠 정보",
     modalBody:
       "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
   },
   8: {
     group: "interactive",
-    text: "오해 소지 있음",
-    modalTitle: "오해 소지 정보",
+    text: "ⓘ 오해 소지 있음",
+    modalTitle: "ⓘ 오해 소지 정보",
     modalBody:
       "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
   },
   9: {
     group: "interactive",
-    text: "AI-생성/오해 소지 있음",
-    modalTitle: "AI 생성 및 오해 소지 정보",
+    text: "ⓘ AI-생성/오해 소지 있음",
+    modalTitle: "ⓘ AI 생성 및 오해 소지 정보",
     modalBody:
       "AI 생성 콘텐츠(AIGC)는 인공지능에 의해 생성되거나 수정된 이미지, 영상 및/또는 오디오를 포함합니다. 여기에는 실제 사람과 유사한 모습이나 특정 예술 스타일(예: 회화, 만화, 애니메이션)로 만들어진 인공적인 시각물, 영상 또는 음향 등이 포함될 수 있습니다.\n\n이 콘텐츠는 오해의 소지가 있는 정보를 포함할 수 있습니다. 실제 사실과 다를 수 있으므로 내용을 그대로 받아들이기보다 신중한 판단이 필요합니다.\n\n예시:\n• 실제 인물의 이미지, 목소리 또는 발화 내용이 AI에 의해 수정된 영상\n• 실제 사건이나 장면을 AI로 변경한 이미지 또는 영상\n• 실제 또는 가상의 사람, 장소, 사건을 완전히 AI로 생성한 콘텐츠",
   },
@@ -129,7 +129,7 @@ export default function PostFeed() {
         (a, b) => mediaOrder[a.media_type] - mediaOrder[b.media_type],
       );
 
-      setPosts(sortedPosts.slice(1, 2));
+      setPosts(sortedPosts);
       setIsLoadingPosts(false);
     };
 
@@ -268,13 +268,13 @@ export default function PostFeed() {
           </header>
 
           {currentLabel.group === "badge" && (
-            <div className="mx-4 mb-2 inline-flex rounded-full bg-gray-100 px-3 py-1.5 text-base font-bold text-gray-900">
+            <div className="mx-4 mb-2 inline-flex rounded-full bg-slate-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm">
               {currentLabel.text}
             </div>
           )}
 
           {currentLabel.group === "sentence" && (
-            <div className="mx-4 mb-2 px-4 py-2 rounded-xl text-base text-gray-800 bg-gray-100 leading-6">
+            <div className="mx-4 mb-2 rounded-xl bg-gray-600 px-4 py-2 text-sm font-medium leading-6 text-white shadow-sm">
               {currentLabel.text}
             </div>
           )}
@@ -288,7 +288,7 @@ export default function PostFeed() {
                   await logEvent("label_click");
                   await logEvent("modal_open");
                 }}
-                className="px-3 py-1.5 rounded-full bg-gray-100 text-base font-medium text-gray-800 transition-transform duration-150 hover:scale-105"
+                className="rounded-full bg-gray-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-gray-700 hover:scale-105"
               >
                 {currentLabel.text}
               </button>
@@ -300,7 +300,7 @@ export default function PostFeed() {
                   await logEvent("label_click");
                   await logEvent("modal_open");
                 }}
-                className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer bg-transparent border-none p-0"
+                className="text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer bg-transparent border-none p-0"
               >
                 자세히 보기
               </button>
@@ -377,8 +377,10 @@ export default function PostFeed() {
             <div className="space-y-4 pt-1">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 처음 보았을 때 떠오른 생각이나 느낌을 자유롭게
-                  적어주세요.
+                  이 게시물 안에서 가장 사실에 가깝게 느껴진 부분과 가장
+                  의심스럽게 느껴진 부분을 짚어주시고, 왜그렇게 느끼셨는 지
+                  설명해주세요
+                  <br />둘 중 하나만 떠오른다면 그것만 적으셔도 좋습니다.
                 </label>
                 <textarea
                   value={accuracyResponse}
@@ -387,30 +389,12 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
-                {(currentPost.media_type === "text" ||
-                  currentPost.media_type === "image") && (
-                  <div className="mt-3">
-                    <label className="mb-2 block text-sm font-semibold text-blue-900">
-                      위 질문의 의도가 무엇인 것 같으십니까?
-                    </label>
-                    <textarea
-                      value={accuracyIntentResponse}
-                      onChange={(e) =>
-                        setAccuracyIntentResponse(e.target.value)
-                      }
-                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-                      rows={2}
-                      placeholder="응답을 입력해 주세요."
-                    />
-                  </div>
-                )}
               </div>
 
-              {/* <div>
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  이 게시물을 보면서 자연스럽게 납득된 부분이나, 반대로 ‘이게
-                  사실일까?’ 하고 의문이 들었던 부분이 있다면 자유롭게
-                  적어주세요. 둘 중 하나만 떠오른다면 그것만 작성하셔도 됩니다.
+                  이 게시물을 처음 보았을 때, 머릿속에 떠오른 생각이나 느낌을
+                  자유롭게 적어주세요.
                 </label>
                 <textarea
                   value={thoughtResponse}
@@ -419,28 +403,15 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
-                {(currentPost.media_type === "text" ||
-                  currentPost.media_type === "image") && (
-                  <div className="mt-3">
-                    <label className="mb-2 block text-sm font-semibold text-blue-900">
-                      위 질문의 의도가 무엇인 것 같으십니까?
-                    </label>
-                    <textarea
-                      value={thoughtIntentResponse}
-                      onChange={(e) => setThoughtIntentResponse(e.target.value)}
-                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-                      rows={2}
-                      placeholder="응답을 입력해 주세요."
-                    />
-                  </div>
-                )}
-              </div> */}
+              </div>
 
-              {/* <div>
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-800">
-                  {
-                    "이 게시물의 내용이 사실일 가능성이 얼마나 된다고 생각하시는지, 그렇게 보시는 이유와 함께 적어주세요. '거의 확실하다' 정도에 가까운지, '반반' 정도에 가까운지, '거의 아닐 것 같다' 정도에 가까운지 자유롭게요."
-                  }
+                  이 게시물을 보면서 떠오른 사람이 있다면, 누구이고 어떤
+                  방식으로 전하게 될 것 같은지, 그리고 어떤 상황에서 그럴 것
+                  같은지 구체적으로 적어주세요.
+                  <br />
+                  떠오르는 사람이 없다면, 왜 그런지도 함께 설명해주세요.
                 </label>
                 <textarea
                   value={shareIntentionResponse}
@@ -449,22 +420,7 @@ export default function PostFeed() {
                   rows={3}
                   placeholder="응답을 입력해 주세요."
                 />
-                {(currentPost.media_type === "text" ||
-                  currentPost.media_type === "image") && (
-                  <div className="mt-3">
-                    <label className="mb-2 block text-sm font-semibold text-blue-900">
-                      위 질문의 의도가 무엇인 것 같으십니까?
-                    </label>
-                    <textarea
-                      value={shareIntentResponse}
-                      onChange={(e) => setShareIntentResponse(e.target.value)}
-                      className="w-full rounded-xl border border-blue-300 px-4 py-3 text-base text-gray-900 placeholder-gray-400 outline-none focus:border-blue-600"
-                      rows={2}
-                      placeholder="응답을 입력해 주세요."
-                    />
-                  </div>
-                )}
-              </div> */}
+              </div>
             </div>
 
             <div className="mt-4">
